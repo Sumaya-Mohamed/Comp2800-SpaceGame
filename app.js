@@ -23,13 +23,14 @@ const keys = {
 };
 
 const enemies = [];
+
 const enemyRows = 2;
-const enemyCols = 5;
+const enemyCols = 8;
 const enemyWidth = 50;
 const enemyHeight = 35;
-const enemyGapX = 70;
+const enemyGapX = 62;
 const enemyGapY = 55;
-const enemyStartX = 110;
+const enemyStartX = 85;
 const enemyStartY = 80;
 
 for (let row = 0; row < enemyRows; row++) {
