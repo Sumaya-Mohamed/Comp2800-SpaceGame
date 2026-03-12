@@ -121,31 +121,75 @@ function drawPlayer() {
   ctx.save();
   ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
 
+  ctx.shadowColor = "#7df9ff";
+  ctx.shadowBlur = 25;
+
+  // main body
   ctx.beginPath();
-  ctx.moveTo(0, -25);
-  ctx.lineTo(-20, 20);
-  ctx.lineTo(-7, 12);
-  ctx.lineTo(0, 20);
-  ctx.lineTo(7, 12);
-  ctx.lineTo(20, 20);
+  ctx.moveTo(0, -28);
+  ctx.lineTo(-18, 10);
+  ctx.lineTo(-8, 8);
+  ctx.lineTo(-5, 22);
+  ctx.lineTo(5, 22);
+  ctx.lineTo(8, 8);
+  ctx.lineTo(18, 10);
   ctx.closePath();
 
-  const shipGradient = ctx.createLinearGradient(0, -25, 0, 20);
-  shipGradient.addColorStop(0, "#79f7ff");
-  shipGradient.addColorStop(1, "#2d8cff");
-  ctx.fillStyle = shipGradient;
+  const bodyGradient = ctx.createLinearGradient(0, -28, 0, 22);
+  bodyGradient.addColorStop(0, "#9efcff");
+  bodyGradient.addColorStop(0.5, "#4cc9ff");
+  bodyGradient.addColorStop(1, "#2563eb");
+  ctx.fillStyle = bodyGradient;
   ctx.fill();
 
-  ctx.shadowColor = "#79f7ff";
-  ctx.shadowBlur = 18;
-  ctx.fill();
-
+  // cockpit
   ctx.beginPath();
-  ctx.moveTo(-8, 20);
-  ctx.lineTo(0, 34);
-  ctx.lineTo(8, 20);
+  ctx.moveTo(0, -14);
+  ctx.lineTo(-6, 2);
+  ctx.lineTo(6, 2);
   ctx.closePath();
-  ctx.fillStyle = "#ff9f43";
+  ctx.fillStyle = "#dff8ff";
+  ctx.fill();
+
+  // left wing
+  ctx.beginPath();
+  ctx.moveTo(-18, 10);
+  ctx.lineTo(-28, 18);
+  ctx.lineTo(-10, 14);
+  ctx.closePath();
+  ctx.fillStyle = "#60a5fa";
+  ctx.fill();
+
+  // right wing
+  ctx.beginPath();
+  ctx.moveTo(18, 10);
+  ctx.lineTo(28, 18);
+  ctx.lineTo(10, 14);
+  ctx.closePath();
+  ctx.fillStyle = "#60a5fa";
+  ctx.fill();
+
+  // flame
+  ctx.shadowBlur = 15;
+  ctx.beginPath();
+  ctx.moveTo(-7, 22);
+  ctx.lineTo(0, 38);
+  ctx.lineTo(7, 22);
+  ctx.closePath();
+
+  const flameGradient = ctx.createLinearGradient(0, 22, 0, 38);
+  flameGradient.addColorStop(0, "#ffd166");
+  flameGradient.addColorStop(1, "#ff5a36");
+  ctx.fillStyle = flameGradient;
+  ctx.fill();
+
+  // inner flame
+  ctx.beginPath();
+  ctx.moveTo(-3, 24);
+  ctx.lineTo(0, 33);
+  ctx.lineTo(3, 24);
+  ctx.closePath();
+  ctx.fillStyle = "#fff4a3";
   ctx.fill();
 
   ctx.restore();
@@ -167,7 +211,6 @@ function drawBullets() {
     ctx.shadowColor = "#ffe66d";
     ctx.shadowBlur = 12;
     ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-
     ctx.shadowBlur = 0;
   }
 }
@@ -281,7 +324,7 @@ function checkCollisions() {
     }
   }
 
-  const aliveEnemies = enemies.filter(enemy => enemy.alive);
+  const aliveEnemies = enemies.filter((enemy) => enemy.alive);
   if (aliveEnemies.length === 0) {
     win = true;
   }
