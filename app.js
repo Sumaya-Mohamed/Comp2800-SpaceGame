@@ -220,7 +220,7 @@ function updateEnemies() {
   for (let enemy of enemies) {
     if (!enemy.alive) continue;
 
-    enemy.y += 0.4;
+    enemy.y += 0.6;
 
     if (enemy.y + enemy.height >= player.y) {
       gameOver = true;
