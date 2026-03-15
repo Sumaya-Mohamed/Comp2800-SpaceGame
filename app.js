@@ -33,7 +33,7 @@ for (let i = 0; i < enemyCount; i++) {
     width: 56,
     height: 56,
     alive: true,
-    speed: 1.5 + Math.random() * 1.0
+    speed: 2.0 + Math.random() * 1.5
   });
 }
 
