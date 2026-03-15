@@ -6,7 +6,7 @@ const player = {
   y: canvas.height - 70,
   width: 50,
   height: 50,
-  speed: 7
+  speed: 11
 };
 
 let score = 0;
@@ -25,17 +25,15 @@ const keys = {
 
 const enemyCount = 18;
 
-// mixed enemy placement across the top area
+// enemies spawn near the top, spread across screen
 for (let i = 0; i < enemyCount; i++) {
   enemies.push({
     x: Math.random() * (canvas.width - 70) + 10,
-    y: Math.random() * 170 + 30,
+    y: Math.random() * 180 - 180,
     width: 56,
     height: 56,
     alive: true,
-    dx: (Math.random() < 0.5 ? -1 : 1) * (1.8 + Math.random() * 1.5),
-    dy: 0.22 + Math.random() * 0.18,
-    wobbleOffset: Math.random() * Math.PI * 2
+    speed: 1.8 + Math.random() * 1.4
   });
 }
 
@@ -44,7 +42,7 @@ for (let i = 0; i < 90; i++) {
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     radius: Math.random() * 2 + 0.5,
-    speed: Math.random() * 0.6 + 0.2
+    speed: Math.random() * 1.2 + 0.4
   });
 }
 
@@ -56,11 +54,11 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     if (!gameOver && !win) {
       bullets.push({
-        x: player.x + player.width / 2 - 2,
+        x: player.x + player.width / 2 - 3,
         y: player.y - 12,
-        width: 4,
-        height: 14,
-        speed: 9
+        width: 6,
+        height: 18,
+        speed: 16
       });
     }
   }
@@ -86,8 +84,9 @@ function drawBackground() {
 function updateStars() {
   for (let star of stars) {
     star.y += star.speed;
+
     if (star.y > canvas.height) {
-      star.y = 0;
+      star.y = -5;
       star.x = Math.random() * canvas.width;
     }
   }
@@ -204,30 +203,21 @@ function drawBullets() {
   for (let bullet of bullets) {
     ctx.fillStyle = "#ffe66d";
     ctx.shadowColor = "#ffe66d";
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 14;
     ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     ctx.shadowBlur = 0;
   }
 }
 
 function updateEnemies() {
-  const t = Date.now() * 0.003;
-
   for (let enemy of enemies) {
     if (!enemy.alive) continue;
 
-    enemy.x += enemy.dx;
-    enemy.y += enemy.dy;
-    enemy.x += Math.sin(t + enemy.wobbleOffset) * 0.7;
+    enemy.y += enemy.speed;
 
-    if (enemy.x <= 0) {
-      enemy.x = 0;
-      enemy.dx *= -1;
-    }
-
-    if (enemy.x + enemy.width >= canvas.width) {
-      enemy.x = canvas.width - enemy.width;
-      enemy.dx *= -1;
+    if (enemy.y > canvas.height) {
+      enemy.y = -enemy.height - Math.random() * 120;
+      enemy.x = Math.random() * (canvas.width - enemy.width);
     }
 
     if (enemy.y + enemy.height >= player.y) {
@@ -246,7 +236,7 @@ function drawPixelInvader(enemy) {
     "110111111011",
     "110110011011",
     "110000000011",
-    "001100001100",
+    "001111111100",
     "011000000110"
   ];
 
@@ -287,14 +277,14 @@ function drawEnemies() {
 }
 
 function createExplosion(x, y) {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 12; i++) {
     explosions.push({
       x,
       y,
-      dx: (Math.random() - 0.5) * 4,
-      dy: (Math.random() - 0.5) * 4,
+      dx: (Math.random() - 0.5) * 5,
+      dy: (Math.random() - 0.5) * 5,
       radius: Math.random() * 3 + 2,
-      life: 20
+      life: 18
     });
   }
 }
@@ -315,7 +305,7 @@ function drawExplosions() {
   for (let particle of explosions) {
     ctx.beginPath();
     ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 180, 80, ${particle.life / 20})`;
+    ctx.fillStyle = `rgba(255, 180, 80, ${particle.life / 18})`;
     ctx.fill();
   }
 }
