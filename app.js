@@ -2,10 +2,10 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const player = {
-  x: canvas.width / 2 - 30,
-  y: canvas.height - 78,
-  width: 60,
-  height: 60,
+  x: canvas.width / 2 - 25,
+  y: canvas.height - 70,
+  width: 50,
+  height: 50,
   speed: 7
 };
 
@@ -25,19 +25,17 @@ const keys = {
 
 const enemyCount = 18;
 
+// mixed enemy placement across the top area
 for (let i = 0; i < enemyCount; i++) {
-  const baseX = Math.random() * (canvas.width - 90) + 20;
-  const baseY = Math.random() * 180 + 40;
-
   enemies.push({
-    x: baseX,
-    y: baseY,
+    x: Math.random() * (canvas.width - 70) + 10,
+    y: Math.random() * 170 + 30,
     width: 56,
     height: 56,
     alive: true,
-    dx: (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 1.4),
-    drift: Math.random() * 0.8 + 0.2,
-    offset: Math.random() * Math.PI * 2
+    dx: (Math.random() < 0.5 ? -1 : 1) * (1.8 + Math.random() * 1.5),
+    dy: 0.22 + Math.random() * 0.18,
+    wobbleOffset: Math.random() * Math.PI * 2
   });
 }
 
@@ -114,105 +112,80 @@ function updatePlayer() {
   }
 }
 
-function drawPixelArt(startX, startY, pattern, pixelSize, colorMap) {
-  for (let row = 0; row < pattern.length; row++) {
-    for (let col = 0; col < pattern[row].length; col++) {
-      const cell = pattern[row][col];
-      if (cell !== ".") {
-        ctx.fillStyle = colorMap[cell];
-        ctx.fillRect(
-          startX + col * pixelSize,
-          startY + row * pixelSize,
-          pixelSize,
-          pixelSize
-        );
-      }
-    }
-  }
-}
-
 function drawPlayer() {
-  const pattern = [
-    "......BBB......",
-    "......BWB......",
-    "......BWB......",
-    ".....BBWBB.....",
-    ".....BWWWB.....",
-    ".....BWWWB.....",
-    "...BBBWWWWWBBB.",
-    "...BRBWWWWWRB..",
-    "..BBRBWWWWWRBB.",
-    "..BWWWWRWWWWB..",
-    "..BWWWRRRWWWB..",
-    ".BBWWRRWRRWWBB.",
-    ".BWWWRRWRRWWWB.",
-    ".BWWBRRRRRBWWB.",
-    ".BWWBWWRWWBWWB.",
-    ".BWWBWWRWWBWWB.",
-    ".BWWBWWRWWBWWB.",
-    ".BWWBWWRWWBWWB.",
-    ".BWWWWWRWWWWWB.",
-    "..BWWWWRWWWWB..",
-    "..BBWWRRRWWBB..",
-    "...BWWRRRWWB...",
-    "...BBWWRWWBB...",
-    "....BWWRWWB....",
-    "....BBBRBBB...."
-  ];
-
-  const colorMap = {
-    B: "#000000",
-    W: "#f2f2f2",
-    R: "#ff4a3d",
-    U: "#4b5bdc"
-  };
-
-  // add blue accents separately to keep layout clean
-  const bluePattern = [
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    ".....U.....U....",
-    "....U.......U...",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ];
-
-  const pixelSize = 4;
-  const spriteWidth = pattern[0].length * pixelSize;
-  const spriteHeight = pattern.length * pixelSize;
-
-  const startX = player.x + (player.width - spriteWidth) / 2;
-  const startY = player.y + (player.height - spriteHeight) / 2;
-
   ctx.save();
-  ctx.shadowColor = "rgba(255,255,255,0.2)";
-  ctx.shadowBlur = 6;
+  ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
 
-  drawPixelArt(startX, startY, pattern, pixelSize, colorMap);
+  ctx.shadowColor = "#7df9ff";
+  ctx.shadowBlur = 25;
 
-  const blueColorMap = {
-    U: "#4b5bdc"
-  };
-  drawPixelArt(startX, startY, bluePattern, pixelSize, blueColorMap);
+  // main body
+  ctx.beginPath();
+  ctx.moveTo(0, -28);
+  ctx.lineTo(-18, 10);
+  ctx.lineTo(-8, 8);
+  ctx.lineTo(-5, 22);
+  ctx.lineTo(5, 22);
+  ctx.lineTo(8, 8);
+  ctx.lineTo(18, 10);
+  ctx.closePath();
+
+  const bodyGradient = ctx.createLinearGradient(0, -28, 0, 22);
+  bodyGradient.addColorStop(0, "#9efcff");
+  bodyGradient.addColorStop(0.5, "#4cc9ff");
+  bodyGradient.addColorStop(1, "#2563eb");
+  ctx.fillStyle = bodyGradient;
+  ctx.fill();
+
+  // cockpit
+  ctx.beginPath();
+  ctx.moveTo(0, -14);
+  ctx.lineTo(-6, 2);
+  ctx.lineTo(6, 2);
+  ctx.closePath();
+  ctx.fillStyle = "#dff8ff";
+  ctx.fill();
+
+  // left wing
+  ctx.beginPath();
+  ctx.moveTo(-18, 10);
+  ctx.lineTo(-28, 18);
+  ctx.lineTo(-10, 14);
+  ctx.closePath();
+  ctx.fillStyle = "#60a5fa";
+  ctx.fill();
+
+  // right wing
+  ctx.beginPath();
+  ctx.moveTo(18, 10);
+  ctx.lineTo(28, 18);
+  ctx.lineTo(10, 14);
+  ctx.closePath();
+  ctx.fillStyle = "#60a5fa";
+  ctx.fill();
+
+  // flame
+  ctx.shadowBlur = 15;
+  ctx.beginPath();
+  ctx.moveTo(-7, 22);
+  ctx.lineTo(0, 38);
+  ctx.lineTo(7, 22);
+  ctx.closePath();
+
+  const flameGradient = ctx.createLinearGradient(0, 22, 0, 38);
+  flameGradient.addColorStop(0, "#ffd166");
+  flameGradient.addColorStop(1, "#ff5a36");
+  ctx.fillStyle = flameGradient;
+  ctx.fill();
+
+  // inner flame
+  ctx.beginPath();
+  ctx.moveTo(-3, 24);
+  ctx.lineTo(0, 33);
+  ctx.lineTo(3, 24);
+  ctx.closePath();
+  ctx.fillStyle = "#fff4a3";
+  ctx.fill();
 
   ctx.restore();
 }
@@ -238,14 +211,14 @@ function drawBullets() {
 }
 
 function updateEnemies() {
-  const time = Date.now() * 0.002;
+  const t = Date.now() * 0.003;
 
   for (let enemy of enemies) {
     if (!enemy.alive) continue;
 
     enemy.x += enemy.dx;
-    enemy.y += 0.35 + enemy.drift * 0.35;
-    enemy.x += Math.sin(time + enemy.offset) * 0.6;
+    enemy.y += enemy.dy;
+    enemy.x += Math.sin(t + enemy.wobbleOffset) * 0.7;
 
     if (enemy.x <= 0) {
       enemy.x = 0;
@@ -266,7 +239,6 @@ function updateEnemies() {
 function drawPixelInvader(enemy) {
   const pattern = [
     "001100001100",
-    "001100001100",
     "000111111000",
     "001111111100",
     "011011110110",
@@ -274,7 +246,6 @@ function drawPixelInvader(enemy) {
     "110111111011",
     "110110011011",
     "110000000011",
-    "001111111100",
     "001100001100",
     "011000000110"
   ];
@@ -288,18 +259,8 @@ function drawPixelInvader(enemy) {
 
   ctx.save();
   ctx.shadowColor = "#22f0ff";
-  ctx.shadowBlur = 12;
-
-  const gradient = ctx.createLinearGradient(
-    startX,
-    startY,
-    startX,
-    startY + spriteHeight
-  );
-  gradient.addColorStop(0, "#4efcff");
-  gradient.addColorStop(1, "#16dfe6");
-
-  ctx.fillStyle = gradient;
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = "#22e7f0";
 
   for (let row = 0; row < pattern.length; row++) {
     for (let col = 0; col < pattern[row].length; col++) {
@@ -370,8 +331,6 @@ function isColliding(a, b) {
 
 function checkCollisions() {
   for (let i = bullets.length - 1; i >= 0; i--) {
-    let bulletRemoved = false;
-
     for (let j = 0; j < enemies.length; j++) {
       if (enemies[j].alive && isColliding(bullets[i], enemies[j])) {
         createExplosion(
@@ -382,12 +341,9 @@ function checkCollisions() {
         enemies[j].alive = false;
         bullets.splice(i, 1);
         score += 1;
-        bulletRemoved = true;
         break;
       }
     }
-
-    if (bulletRemoved) continue;
   }
 
   const aliveEnemies = enemies.filter((enemy) => enemy.alive);
