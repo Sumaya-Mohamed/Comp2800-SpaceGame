@@ -23,7 +23,7 @@ const keys = {
   right: false
 };
 
-const enemyCount = 12;
+const enemyCount = 10;
 
 // enemies spawn near the top, spread across screen
 for (let i = 0; i < enemyCount; i++) {
