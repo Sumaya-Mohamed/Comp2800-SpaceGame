@@ -2,36 +2,36 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const player = {
-  x: canvas.width / 2 - 25,
-  y: canvas.height - 70,
-  width: 50,
-  height: 50,
+  x: canvas.width / 2 - 20,
+  y: canvas.height - 55,
+  width: 40,
+  height: 24,
   speed: 7
 };
 
 let score = 0;
+let level = 1;
 let gameOver = false;
 let win = false;
 
 const bullets = [];
 const explosions = [];
 const stars = [];
+const enemies = [];
 
 const keys = {
   left: false,
   right: false
 };
 
-const enemies = [];
-
-const enemyRows = 2;
-const enemyCols = 8;
-const enemyWidth = 50;
-const enemyHeight = 35;
+const enemyRows = 3;
+const enemyCols = 4;
+const enemyWidth = 52;
+const enemyHeight = 34;
 const enemyGapX = 62;
-const enemyGapY = 55;
-const enemyStartX = 85;
-const enemyStartY = 80;
+const enemyGapY = 42;
+const enemyStartX = canvas.width - 260;
+const enemyStartY = 28;
 
 for (let row = 0; row < enemyRows; row++) {
   for (let col = 0; col < enemyCols; col++) {
@@ -40,17 +40,19 @@ for (let row = 0; row < enemyRows; row++) {
       y: enemyStartY + row * enemyGapY,
       width: enemyWidth,
       height: enemyHeight,
-      alive: true
+      alive: true,
+      type: row === 0 ? "elite" : "regular"
     });
   }
 }
 
-for (let i = 0; i < 90; i++) {
+for (let i = 0; i < 80; i++) {
   stars.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    radius: Math.random() * 2 + 0.5,
-    speed: Math.random() * 0.6 + 0.2
+    radius: Math.random() * 1.6 + 0.3,
+    speed: Math.random() * 0.3 + 0.08,
+    alpha: Math.random() * 0.6 + 0.2
   });
 }
 
@@ -58,15 +60,16 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") keys.left = true;
   if (e.key === "ArrowRight") keys.right = true;
 
-  if (e.key === " " || e.code === "Space") {
+  if (e.code === "Space" || e.key === " ") {
     e.preventDefault();
+
     if (!gameOver && !win) {
       bullets.push({
         x: player.x + player.width / 2 - 2,
         y: player.y - 12,
         width: 4,
         height: 14,
-        speed: 9
+        speed: 8
       });
     }
   }
@@ -82,16 +85,14 @@ document.addEventListener("keyup", (e) => {
 });
 
 function drawBackground() {
-  const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  bg.addColorStop(0, "#081427");
-  bg.addColorStop(1, "#02040a");
-  ctx.fillStyle = bg;
+  ctx.fillStyle = "#050505";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function updateStars() {
   for (let star of stars) {
     star.y += star.speed;
+
     if (star.y > canvas.height) {
       star.y = 0;
       star.x = Math.random() * canvas.width;
@@ -102,7 +103,7 @@ function updateStars() {
 function drawStars() {
   for (let star of stars) {
     ctx.beginPath();
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillStyle = `rgba(255,255,255,${star.alpha})`;
     ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
     ctx.fill();
   }
@@ -119,79 +120,42 @@ function updatePlayer() {
 }
 
 function drawPlayer() {
+  const x = player.x;
+  const y = player.y;
+
   ctx.save();
-  ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+  ctx.shadowColor = "#ffe9b5";
+  ctx.shadowBlur = 8;
 
-  ctx.shadowColor = "#7df9ff";
-  ctx.shadowBlur = 25;
+  // center body
+  ctx.fillStyle = "#fff6d8";
+  ctx.fillRect(x + 14, y + 4, 12, 14);
 
-  // main body
+  // nose
   ctx.beginPath();
-  ctx.moveTo(0, -28);
-  ctx.lineTo(-18, 10);
-  ctx.lineTo(-8, 8);
-  ctx.lineTo(-5, 22);
-  ctx.lineTo(5, 22);
-  ctx.lineTo(8, 8);
-  ctx.lineTo(18, 10);
+  ctx.moveTo(x + 20, y);
+  ctx.lineTo(x + 14, y + 8);
+  ctx.lineTo(x + 26, y + 8);
   ctx.closePath();
-
-  const bodyGradient = ctx.createLinearGradient(0, -28, 0, 22);
-  bodyGradient.addColorStop(0, "#9efcff");
-  bodyGradient.addColorStop(0.5, "#4cc9ff");
-  bodyGradient.addColorStop(1, "#2563eb");
-  ctx.fillStyle = bodyGradient;
   ctx.fill();
 
-  // cockpit
+  // wings
   ctx.beginPath();
-  ctx.moveTo(0, -14);
-  ctx.lineTo(-6, 2);
-  ctx.lineTo(6, 2);
+  ctx.moveTo(x + 14, y + 12);
+  ctx.lineTo(x + 3, y + 18);
+  ctx.lineTo(x + 14, y + 18);
   ctx.closePath();
-  ctx.fillStyle = "#dff8ff";
   ctx.fill();
 
-  // left wing
   ctx.beginPath();
-  ctx.moveTo(-18, 10);
-  ctx.lineTo(-28, 18);
-  ctx.lineTo(-10, 14);
+  ctx.moveTo(x + 26, y + 12);
+  ctx.lineTo(x + 37, y + 18);
+  ctx.lineTo(x + 26, y + 18);
   ctx.closePath();
-  ctx.fillStyle = "#60a5fa";
   ctx.fill();
 
-  // right wing
-  ctx.beginPath();
-  ctx.moveTo(18, 10);
-  ctx.lineTo(28, 18);
-  ctx.lineTo(10, 14);
-  ctx.closePath();
-  ctx.fillStyle = "#60a5fa";
-  ctx.fill();
-
-  // flame
-  ctx.shadowBlur = 15;
-  ctx.beginPath();
-  ctx.moveTo(-7, 22);
-  ctx.lineTo(0, 38);
-  ctx.lineTo(7, 22);
-  ctx.closePath();
-
-  const flameGradient = ctx.createLinearGradient(0, 22, 0, 38);
-  flameGradient.addColorStop(0, "#ffd166");
-  flameGradient.addColorStop(1, "#ff5a36");
-  ctx.fillStyle = flameGradient;
-  ctx.fill();
-
-  // inner flame
-  ctx.beginPath();
-  ctx.moveTo(-3, 24);
-  ctx.lineTo(0, 33);
-  ctx.lineTo(3, 24);
-  ctx.closePath();
-  ctx.fillStyle = "#fff4a3";
-  ctx.fill();
+  // tail
+  ctx.fillRect(x + 17, y + 18, 6, 4);
 
   ctx.restore();
 }
@@ -208,11 +172,12 @@ function updateBullets() {
 
 function drawBullets() {
   for (let bullet of bullets) {
-    ctx.fillStyle = "#ffe66d";
-    ctx.shadowColor = "#ffe66d";
-    ctx.shadowBlur = 12;
+    ctx.save();
+    ctx.fillStyle = "#ff8a3d";
+    ctx.shadowColor = "#ffb06a";
+    ctx.shadowBlur = 10;
     ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-    ctx.shadowBlur = 0;
+    ctx.restore();
   }
 }
 
@@ -220,7 +185,7 @@ function updateEnemies() {
   for (let enemy of enemies) {
     if (!enemy.alive) continue;
 
-    enemy.y += 0.3;
+    enemy.y += 0.12 + level * 0.02;
 
     if (enemy.y + enemy.height >= player.y) {
       gameOver = true;
@@ -228,52 +193,120 @@ function updateEnemies() {
   }
 }
 
-function drawEnemy(enemy) {
+function drawRegularUFO(enemy) {
+  const cx = enemy.x + enemy.width / 2;
+  const cy = enemy.y + enemy.height / 2;
+
   ctx.save();
-  ctx.translate(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2);
+  ctx.shadowColor = "#ffffff";
+  ctx.shadowBlur = 4;
 
+  // outer glow ring
   ctx.beginPath();
-  ctx.arc(0, 0, 20, 0, Math.PI * 2);
-  ctx.fillStyle = "#ff3b3b";
-  ctx.shadowColor = "#ff4d4d";
-  ctx.shadowBlur = 15;
+  ctx.ellipse(cx, cy + 2, 23, 10, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#f7f7f7";
+  ctx.fill();
+
+  // orange ring
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 2, 17, 6.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#d08a42";
+  ctx.fill();
+
+  // cockpit
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - 7, 10, 7, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#f4f4f4";
+  ctx.fill();
+
+  // bottom hole
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 2, 7, 3.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#262626";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawEliteUFO(enemy) {
+  const cx = enemy.x + enemy.width / 2;
+  const cy = enemy.y + enemy.height / 2 - 2;
+
+  ctx.save();
+  ctx.shadowColor = "#fff4d8";
+  ctx.shadowBlur = 6;
+
+  // center body
+  ctx.fillStyle = "#fff8e7";
+  ctx.fillRect(cx - 8, cy - 6, 16, 14);
+
+  // top spires
+  ctx.beginPath();
+  ctx.moveTo(cx - 10, cy - 6);
+  ctx.lineTo(cx - 6, cy - 16);
+  ctx.lineTo(cx - 2, cy - 6);
+  ctx.closePath();
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(-7, -5, 4, 0, Math.PI * 2);
-  ctx.arc(7, -5, 4, 0, Math.PI * 2);
-  ctx.fillStyle = "#fff";
+  ctx.moveTo(cx - 2, cy - 6);
+  ctx.lineTo(cx + 2, cy - 18);
+  ctx.lineTo(cx + 6, cy - 6);
+  ctx.closePath();
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(-7, -5, 2, 0, Math.PI * 2);
-  ctx.arc(7, -5, 2, 0, Math.PI * 2);
-  ctx.fillStyle = "#111";
+  ctx.moveTo(cx + 6, cy - 6);
+  ctx.lineTo(cx + 10, cy - 14);
+  ctx.lineTo(cx + 14, cy - 6);
+  ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = "#111";
-  ctx.fillRect(-10, 8, 20, 3);
+  // side wings
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, cy + 2);
+  ctx.lineTo(cx - 16, cy + 8);
+  ctx.lineTo(cx - 8, cy + 8);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(cx + 8, cy + 2);
+  ctx.lineTo(cx + 16, cy + 8);
+  ctx.lineTo(cx + 8, cy + 8);
+  ctx.closePath();
+  ctx.fill();
+
+  // orange center
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 2, 5, 3, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#d58b44";
+  ctx.fill();
 
   ctx.restore();
 }
 
 function drawEnemies() {
   for (let enemy of enemies) {
-    if (enemy.alive) {
-      drawEnemy(enemy);
+    if (!enemy.alive) continue;
+
+    if (enemy.type === "elite") {
+      drawEliteUFO(enemy);
+    } else {
+      drawRegularUFO(enemy);
     }
   }
 }
 
 function createExplosion(x, y) {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 12; i++) {
     explosions.push({
-      x,
-      y,
-      dx: (Math.random() - 0.5) * 4,
-      dy: (Math.random() - 0.5) * 4,
-      radius: Math.random() * 3 + 2,
-      life: 20
+      x: x,
+      y: y,
+      dx: (Math.random() - 0.5) * 3,
+      dy: (Math.random() - 0.5) * 3,
+      radius: Math.random() * 2 + 1,
+      life: 18
     });
   }
 }
@@ -294,7 +327,7 @@ function drawExplosions() {
   for (let particle of explosions) {
     ctx.beginPath();
     ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255, 180, 80, ${particle.life / 20})`;
+    ctx.fillStyle = `rgba(255, 180, 100, ${particle.life / 18})`;
     ctx.fill();
   }
 }
@@ -319,7 +352,13 @@ function checkCollisions() {
 
         enemies[j].alive = false;
         bullets.splice(i, 1);
-        score++;
+
+        if (enemies[j].type === "elite") {
+          score += 20;
+        } else {
+          score += 10;
+        }
+
         break;
       }
     }
@@ -331,29 +370,30 @@ function checkCollisions() {
   }
 }
 
-function drawScore() {
+function drawHUD() {
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 26px Arial";
-  ctx.fillText("Score: " + score, 20, 35);
+  ctx.font = "bold 16px Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("Score: " + score, 14, 24);
+  ctx.fillText("Level: " + level, 14, 44);
 }
 
 function drawEndScreen() {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 48px Arial";
+  ctx.font = "bold 34px Arial";
 
   if (win) {
-    ctx.fillText("YOU WIN!", canvas.width / 2, canvas.height / 2 - 20);
-  } else if (gameOver) {
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 20);
+    ctx.fillText("YOU WIN", canvas.width / 2, canvas.height / 2 - 10);
+  } else {
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
   }
 
-  ctx.font = "22px Arial";
-  ctx.fillStyle = "#d8e6ff";
-  ctx.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 30);
+  ctx.font = "18px Arial";
+  ctx.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 25);
   ctx.textAlign = "left";
 }
 
@@ -371,11 +411,11 @@ function gameLoop() {
 
   updateExplosions();
 
-  drawPlayer();
   drawEnemies();
   drawBullets();
   drawExplosions();
-  drawScore();
+  drawPlayer();
+  drawHUD();
 
   if (gameOver || win) {
     drawEndScreen();
