@@ -2,10 +2,10 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const player = {
-  x: canvas.width / 2 - 25,
-  y: canvas.height - 70,
-  width: 50,
-  height: 50,
+  x: canvas.width / 2 - 30,
+  y: canvas.height - 78,
+  width: 60,
+  height: 60,
   speed: 7
 };
 
@@ -25,7 +25,6 @@ const keys = {
 
 const enemyCount = 18;
 
-// create enemies spread across the screen, mixed and not perfectly aligned
 for (let i = 0; i < enemyCount; i++) {
   const baseX = Math.random() * (canvas.width - 90) + 20;
   const baseY = Math.random() * 180 + 40;
@@ -115,74 +114,105 @@ function updatePlayer() {
   }
 }
 
+function drawPixelArt(startX, startY, pattern, pixelSize, colorMap) {
+  for (let row = 0; row < pattern.length; row++) {
+    for (let col = 0; col < pattern[row].length; col++) {
+      const cell = pattern[row][col];
+      if (cell !== ".") {
+        ctx.fillStyle = colorMap[cell];
+        ctx.fillRect(
+          startX + col * pixelSize,
+          startY + row * pixelSize,
+          pixelSize,
+          pixelSize
+        );
+      }
+    }
+  }
+}
+
 function drawPlayer() {
+  const pattern = [
+    "......BBB......",
+    "......BWB......",
+    "......BWB......",
+    ".....BBWBB.....",
+    ".....BWWWB.....",
+    ".....BWWWB.....",
+    "...BBBWWWWWBBB.",
+    "...BRBWWWWWRB..",
+    "..BBRBWWWWWRBB.",
+    "..BWWWWRWWWWB..",
+    "..BWWWRRRWWWB..",
+    ".BBWWRRWRRWWBB.",
+    ".BWWWRRWRRWWWB.",
+    ".BWWBRRRRRBWWB.",
+    ".BWWBWWRWWBWWB.",
+    ".BWWBWWRWWBWWB.",
+    ".BWWBWWRWWBWWB.",
+    ".BWWBWWRWWBWWB.",
+    ".BWWWWWRWWWWWB.",
+    "..BWWWWRWWWWB..",
+    "..BBWWRRRWWBB..",
+    "...BWWRRRWWB...",
+    "...BBWWRWWBB...",
+    "....BWWRWWB....",
+    "....BBBRBBB...."
+  ];
+
+  const colorMap = {
+    B: "#000000",
+    W: "#f2f2f2",
+    R: "#ff4a3d",
+    U: "#4b5bdc"
+  };
+
+  // add blue accents separately to keep layout clean
+  const bluePattern = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    ".....U.....U....",
+    "....U.......U...",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ];
+
+  const pixelSize = 4;
+  const spriteWidth = pattern[0].length * pixelSize;
+  const spriteHeight = pattern.length * pixelSize;
+
+  const startX = player.x + (player.width - spriteWidth) / 2;
+  const startY = player.y + (player.height - spriteHeight) / 2;
+
   ctx.save();
-  ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+  ctx.shadowColor = "rgba(255,255,255,0.2)";
+  ctx.shadowBlur = 6;
 
-  ctx.shadowColor = "#7df9ff";
-  ctx.shadowBlur = 25;
+  drawPixelArt(startX, startY, pattern, pixelSize, colorMap);
 
-  ctx.beginPath();
-  ctx.moveTo(0, -28);
-  ctx.lineTo(-18, 10);
-  ctx.lineTo(-8, 8);
-  ctx.lineTo(-5, 22);
-  ctx.lineTo(5, 22);
-  ctx.lineTo(8, 8);
-  ctx.lineTo(18, 10);
-  ctx.closePath();
-
-  const bodyGradient = ctx.createLinearGradient(0, -28, 0, 22);
-  bodyGradient.addColorStop(0, "#9efcff");
-  bodyGradient.addColorStop(0.5, "#4cc9ff");
-  bodyGradient.addColorStop(1, "#2563eb");
-  ctx.fillStyle = bodyGradient;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(0, -14);
-  ctx.lineTo(-6, 2);
-  ctx.lineTo(6, 2);
-  ctx.closePath();
-  ctx.fillStyle = "#dff8ff";
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(-18, 10);
-  ctx.lineTo(-28, 18);
-  ctx.lineTo(-10, 14);
-  ctx.closePath();
-  ctx.fillStyle = "#60a5fa";
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(18, 10);
-  ctx.lineTo(28, 18);
-  ctx.lineTo(10, 14);
-  ctx.closePath();
-  ctx.fillStyle = "#60a5fa";
-  ctx.fill();
-
-  ctx.shadowBlur = 15;
-  ctx.beginPath();
-  ctx.moveTo(-7, 22);
-  ctx.lineTo(0, 38);
-  ctx.lineTo(7, 22);
-  ctx.closePath();
-
-  const flameGradient = ctx.createLinearGradient(0, 22, 0, 38);
-  flameGradient.addColorStop(0, "#ffd166");
-  flameGradient.addColorStop(1, "#ff5a36");
-  ctx.fillStyle = flameGradient;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(-3, 24);
-  ctx.lineTo(0, 33);
-  ctx.lineTo(3, 24);
-  ctx.closePath();
-  ctx.fillStyle = "#fff4a3";
-  ctx.fill();
+  const blueColorMap = {
+    U: "#4b5bdc"
+  };
+  drawPixelArt(startX, startY, bluePattern, pixelSize, blueColorMap);
 
   ctx.restore();
 }
@@ -257,7 +287,6 @@ function drawPixelInvader(enemy) {
   const startY = enemy.y + (enemy.height - spriteHeight) / 2;
 
   ctx.save();
-
   ctx.shadowColor = "#22f0ff";
   ctx.shadowBlur = 12;
 
